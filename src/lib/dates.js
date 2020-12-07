@@ -9,7 +9,6 @@
 
 'use strict';
 
-var timeFormat = require('d3-time-format').timeFormat;
 var isNumeric = require('fast-isnumeric');
 
 var Loggers = require('./loggers');
@@ -160,6 +159,7 @@ exports.dateTime2ms = function(s, calendar) {
             var comb = 3 * ONEMIN;
             tzOffset = tzOffset - comb / 2 + mod(offsetTweak - tzOffset + comb / 2, comb);
         }
+        tzOffset = 0; // Switch to UTC
         s = Number(s) - tzOffset;
         if(s >= MIN_MS && s <= MAX_MS) return s;
         return BADNUM;
@@ -315,15 +315,16 @@ exports.ms2DateTime = function(ms, r, calendar) {
 // because that's how people mostly use javasript date objects.
 // Clip one extra day off our date range though so we can't get
 // thrown beyond the range by the timezone shift.
+// CHANGED: Use UTC
 exports.ms2DateTimeLocal = function(ms) {
     if(!(ms >= MIN_MS + ONEDAY && ms <= MAX_MS - ONEDAY)) return BADNUM;
 
     var msecTenths = Math.floor(mod(ms + 0.05, 1) * 10);
     var d = new Date(Math.round(ms - msecTenths / 10));
-    var dateStr = timeFormat('%Y-%m-%d')(d);
-    var h = d.getHours();
-    var m = d.getMinutes();
-    var s = d.getSeconds();
+    var dateStr = utcFormat('%Y-%m-%d')(d);
+    var h = d.getUTCHours();
+    var m = d.getUTCMinutes();
+    var s = d.getUTCSeconds();
     var msec10 = d.getUTCMilliseconds() * 10 + msecTenths;
 
     return includeTime(dateStr, h, m, s, msec10);
