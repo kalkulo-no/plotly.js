@@ -38824,7 +38824,6 @@ exports.validate = validate;
 
 'use strict';
 
-var timeFormat = _dereq_('d3-time-format').timeFormat;
 var isNumeric = _dereq_('fast-isnumeric');
 
 var Loggers = _dereq_('./loggers');
@@ -38975,6 +38974,7 @@ exports.dateTime2ms = function(s, calendar) {
             var comb = 3 * ONEMIN;
             tzOffset = tzOffset - comb / 2 + mod(offsetTweak - tzOffset + comb / 2, comb);
         }
+        tzOffset = 0; // Switch to UTC
         s = Number(s) - tzOffset;
         if(s >= MIN_MS && s <= MAX_MS) return s;
         return BADNUM;
@@ -39130,15 +39130,16 @@ exports.ms2DateTime = function(ms, r, calendar) {
 // because that's how people mostly use javasript date objects.
 // Clip one extra day off our date range though so we can't get
 // thrown beyond the range by the timezone shift.
+// CHANGED: Use UTC
 exports.ms2DateTimeLocal = function(ms) {
     if(!(ms >= MIN_MS + ONEDAY && ms <= MAX_MS - ONEDAY)) return BADNUM;
 
     var msecTenths = Math.floor(mod(ms + 0.05, 1) * 10);
     var d = new Date(Math.round(ms - msecTenths / 10));
-    var dateStr = timeFormat('%Y-%m-%d')(d);
-    var h = d.getHours();
-    var m = d.getMinutes();
-    var s = d.getSeconds();
+    var dateStr = utcFormat('%Y-%m-%d')(d);
+    var h = d.getUTCHours();
+    var m = d.getUTCMinutes();
+    var s = d.getUTCSeconds();
     var msec10 = d.getUTCMilliseconds() * 10 + msecTenths;
 
     return includeTime(dateStr, h, m, s, msec10);
@@ -41297,7 +41298,7 @@ function templateFormatString(string, labels, d3locale) {
             }
 
             if(format[0] === '|') {
-                fmt = d3locale ? d3locale.timeFormat : utcFormat;
+                fmt = utcFormat;
                 var ms = lib.dateTime2ms(value);
                 value = lib.formatDate(ms, format.replace(TEMPLATE_STRING_FORMAT_SEPARATOR, ''), false, fmt);
             }
@@ -63826,7 +63827,7 @@ module.exports = function setConvert(ax, fullLayout) {
     // Fall back on default format for dummy axes that don't care about formatting
     var locale = fullLayout._d3locale;
     if(ax.type === 'date') {
-        ax._dateFormat = locale ? locale.timeFormat : utcFormat;
+        ax._dateFormat = utcFormat;
         ax._extraFormat = fullLayout._extraFormat;
     }
     // occasionally we need _numFormat to pass through
