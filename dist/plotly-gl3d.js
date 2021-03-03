@@ -1,6 +1,6 @@
 /**
 * plotly.js (gl3d) v1.57.1
-* Copyright 2012-2020, Plotly, Inc.
+* Copyright 2012-2021, Plotly, Inc.
 * All rights reserved.
 * Licensed under the MIT license
 */
@@ -80746,7 +80746,11 @@ loggers.warn = function() {
         for(i = 0; i < arguments.length; i++) {
             messages.push(arguments[i]);
         }
-        apply(console.trace || console.log, messages);
+        if(dfltConfig.logging > 2) {
+            apply(console.trace || console.log, messages);
+        } else {
+            apply(console.warn || console.log, messages);
+        }
     }
 
     if(dfltConfig.notifyOnLogging > 0) {
@@ -105489,6 +105493,7 @@ proto.initializeGLPlot = function() {
                     y: s * o.y,
                     z: s * o.z
                 });
+                scene.camera.center = scene.camera.center.map((c) => s * c);
             }
 
             relayoutCallback(scene);
