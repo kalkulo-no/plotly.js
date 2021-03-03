@@ -50,7 +50,11 @@ loggers.warn = function() {
         for(i = 0; i < arguments.length; i++) {
             messages.push(arguments[i]);
         }
-        apply(console.trace || console.log, messages);
+        if(dfltConfig.logging > 2) {
+            apply(console.trace || console.log, messages);
+        } else {
+            apply(console.warn || console.log, messages);
+        }
     }
 
     if(dfltConfig.notifyOnLogging > 0) {
