@@ -252,6 +252,7 @@ proto.initializeGLPlot = function() {
                     y: s * o.y,
                     z: s * o.z
                 });
+                scene.camera.center = scene.camera.center.map((c) => s * c);
             }
 
             relayoutCallback(scene);
